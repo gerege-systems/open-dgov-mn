@@ -5,7 +5,7 @@ go 1.26
 toolchain go1.26.6
 
 require (
-	github.com/gerege-systems/open-gerege-nexus/backend v1.9.0
+	github.com/gerege-systems/open-gerege-nexus/backend v1.9.1
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 )
