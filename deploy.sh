@@ -57,12 +57,17 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-curl -fsS "http://127.0.0.1:${port_frontend}/" >/dev/null || { echo "бүрхүүл хариулахгүй байна" >&2; exit 1; }
-
+# Бүрхүүл нь backend эрүүл болсны дараа хэдэн секунд асдаг тул нэг удаагийн
+# шалгалт нь эрүүл rollout-ыг унасан гэж дуудна — эхний оролдлого дээр яг
+# ингэсэн.
 brand="$(grep -E '^BRAND_NAME=' .env | cut -d= -f2-)"
-if [ -n "$brand" ] && ! curl -fsS "http://127.0.0.1:${port_frontend}/login" | grep -qF "$brand"; then
-  echo "бүрхүүл «$brand» гэж хэлэхгүй байна — BRAND_NAME хүрээгүй" >&2
-  exit 1
-fi
+for i in $(seq 1 30); do
+  if body="$(curl -fsS "http://127.0.0.1:${port_frontend}/login" 2>/dev/null)"; then
+    [ -z "$brand" ] && break
+    case "$body" in *"$brand"*) break ;; esac
+  fi
+  [ "$i" -eq 30 ] && { echo "бүрхүүл 60 секундэд «${brand:-хариу}» өгсөнгүй" >&2; exit 1; }
+  sleep 2
+done
 
 echo "OK: $(grep -E '^PUBLIC_ORIGIN=' .env | cut -d= -f2) — $brand"
