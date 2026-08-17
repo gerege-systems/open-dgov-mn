@@ -23,8 +23,10 @@ if [ ! -f .env ]; then
 fi
 
 # Бүрхүүл ./brand-ийг унших горимоор mount хийдэг тул байхгүй бол Docker
-# өөрөө root-ийн эзэмшилтэй хавтас үүсгэнэ.
-mkdir -p brand
+# өөрөө root-ийн эзэмшилтэй хавтас үүсгэнэ. chmod нь сайн дурын биш: nginx
+# энэ лавлахаас /brand/… -г шууд өгдөг ба www-data 0700 дотор орж чадахгүй —
+# лого тавьсны дараа л мэдэгддэг 403.
+mkdir -p brand && chmod 755 brand
 
 curl -fsSL -o docker-compose.prod.yml "${CORE_RAW}/docker-compose.prod.yml"
 
