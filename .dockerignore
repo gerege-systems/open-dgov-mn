@@ -1,0 +1,8 @@
+# Образ угсрахад хэрэггүй зүйлс. docs/site нь Node-оор баригддаг тул түүний
+# node_modules нь build context-ын хамгийн том хэсэг болох боловч Go-гийн
+# build түүнийг хэзээ ч уншихгүй.
+.git
+docs/site/node_modules
+docs/site/dist
+docker-compose.prod.yml
+.env

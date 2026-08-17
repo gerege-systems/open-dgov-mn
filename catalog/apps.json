@@ -1,0 +1,19 @@
+[
+  {
+    "id": "mn.dgov.zarlal",
+    "slug": "dgov-zarlal",
+    "name": "Announcements",
+    "description": "Announcements inside an organisation: pinned first, expired ones stop being shown without being deleted. Everybody in the organisation reads them; posting is an administrator's act.",
+    "icon_url": "/icons/announcements.png",
+    "category": "Communication",
+    "visibility": "public",
+    "version": "1.0.0",
+    "translations": {
+      "mn": {
+        "name": "Зарлал",
+        "description": "Байгууллагын доторх зарлал: онцолсон нь эхэндээ, хугацаа нь дууссан нь устахгүйгээр харагдахаа болино. Байгууллагын хүн бүр уншина, нийтлэх нь админы эрх.",
+        "category": "Харилцаа"
+      }
+    }
+  }
+]

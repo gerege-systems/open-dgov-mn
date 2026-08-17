@@ -3,15 +3,20 @@
 #
 #   REGISTRY_USER=<github-хэрэглэгч> REGISTRY_TOKEN=<read:packages токен> ./deploy.sh
 #
-# Юу хийдэг вэ: цөмийн compose файлыг ТҮГЖСЭН хувилбараар нь татаж, GHCR-ээс
-# образуудыг татаж, стекийг солиод, эрүүл эсэхийг асууна. Энэ репод цөмийн код
-# байхгүй тул шинэчлэлт гэдэг нь CORE_REF ба IMAGE_TAG хоёрыг өөрчлөх явдал.
+# Юу хийдэг вэ: цөмийн compose файлыг ТҮГЖСЭН хувилбараар нь татаж, дээр нь
+# энэ репогийн давхаргыг тавьж, GHCR-ээс образуудыг татаж, стекийг солиод,
+# эрүүл эсэхийг асууна.
+#
+# Backend образ нь одоо энэ репогийнх (цөм + өөрийн модулиуд), CI угсарч GHCR
+# рүү түлхдэг; бүрхүүл нь цөмийнх хэвээр. Тиймээс шинэчлэл гэдэг нь юуг
+# хөдөлгөж байгаагаас хамаарна: өөрийн код бол go.mod ба IMAGE_TAG, цөмийн
+# compose/nginx бол доорх CORE_REF, бүрхүүл бол FRONTEND_TAG.
 set -euo pipefail
 
 # Цөмийн түгжигдсэн хувилбар. compose файл болон nginx-ийн snippet хоёулаа
 # эндээс ирнэ — салбарын толгойгоос биш: "өчигдөр ажиллаж байсан" гэдэг нь
 # тодорхой commit байх ёстой, өнөөдрийн main биш.
-CORE_REF="${CORE_REF:-3ad6a728cc179224addb50dfa8127acdb9ba180d}"
+CORE_REF="${CORE_REF:-c2e311ec8688049c688f732ac297e6e6da72d84b}"
 CORE_RAW="https://raw.githubusercontent.com/gerege-systems/open-gerege-nexus/${CORE_REF}"
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -30,6 +35,22 @@ mkdir -p brand && chmod 755 brand
 
 curl -fsSL -o docker-compose.prod.yml "${CORE_RAW}/docker-compose.prod.yml"
 
+# Цөмийн compose, дээр нь энэ репогийн давхарга — гэхдээ зөвхөн .env нь энэ
+# репогийн образыг зааж байвал. Давхарга нь тэр образыг хүлээдэг: өөрийн
+# миграцын түүх нь түүн дотор /app/db/dgov байдаг тул цөмийн образ дээр
+# migrate-dgov нь хавтас олдохгүй гэж унана.
+#
+# Хоёр салаа байгаа нь шилжилтийн үе учраас: серверийн .env цөмийн образыг
+# заасан хэвээр байна. Тэр мөрийг солих нь Түвшин 2 рүү шилжих алхам өөрөө
+# (README-гийн "Шинэчлэх") бөгөөд шилжсэний дараа энэ нөхцөл хасагдана.
+compose=(docker compose -f docker-compose.prod.yml)
+if grep -qE '^IMAGE_BACKEND=.*open-dgov-mn' .env; then
+  compose+=(-f deploy/compose.dgov.yml)
+else
+  echo "IMAGE_BACKEND нь цөмийн образыг зааж байна — энэ репогийн модулиуд ачаалагдахгүй." >&2
+  echo "Шилжихдээ: IMAGE_BACKEND=ghcr.io/gerege-systems/open-dgov-mn/backend" >&2
+fi
+
 # nginx-ийн OIDC snippet. Vhost үүнийг include хийдэг — байхгүй бол `nginx -t`
 # унана, орхивол discovery-гийн хүсэлт бүрт бүрхүүлийн 404 хариулагдана.
 if [ -w /etc/nginx/snippets ]; then
@@ -42,8 +63,8 @@ echo "$REGISTRY_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-std
 
 # Ажиллаж байгаа контейнеруудыг образ хост дээр буусны дараа л хөндөнө: pull
 # унасны дараах татан буулгалт бол амжилтгүй deploy биш, тасалдал.
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d --remove-orphans
+"${compose[@]}" pull
+"${compose[@]}" up -d --remove-orphans
 
 docker logout ghcr.io >/dev/null
 
@@ -55,7 +76,7 @@ port_frontend="$(grep -E '^FRONTEND_HOST_PORT=' .env | cut -d= -f2)"; port_front
 
 for i in $(seq 1 30); do
   if curl -fsS "http://127.0.0.1:${port_backend}/health" >/dev/null 2>&1; then break; fi
-  [ "$i" -eq 30 ] && { echo "backend 60 секундэд эрүүл болсонгүй" >&2; docker compose -f docker-compose.prod.yml logs --tail 40 backend >&2; exit 1; }
+  [ "$i" -eq 30 ] && { echo "backend 60 секундэд эрүүл болсонгүй" >&2; "${compose[@]}" logs --tail 40 backend migrate >&2; exit 1; }
   sleep 2
 done
 

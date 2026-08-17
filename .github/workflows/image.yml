@@ -1,0 +1,70 @@
+name: Image
+
+# open.dgov.mn-ий backend образыг угсарч GHCR рүү түлхэнэ.
+#
+# Байрлуулалт нь хэвээрээ: сервер дээр `./deploy.sh` образыг татна. Өөрчлөгдсөн
+# зүйл нь тэр образ хаанаас гардаг явдал — цөмийн CI-аас биш, эндээс.
+#
+# CI-ийн дараа гүйдэг, зэрэгцээ биш: нэгтгэл хоёуланг нь зэрэг эхлүүлбэл тест
+# дуусахаас өмнө образ нийтлэгдэнэ, тэгвэл GHCR дээр эрүүл гэж тэмдэглэгдсэн
+# зүйл нь ердөө хараахан шалгагдаагүй зүйл болно.
+#
+# Роллаут автоматаар хийгдэхгүй. Энэ хост дээр төрийн үйлчилгээ ажиллаж байгаа
+# тул стекийг солих нь хүн харж байхад эхлэх ажил — `./deploy.sh` гараар.
+
+on:
+  workflow_run:
+    # ci.yml-ийн `name:`-тэй яг таарах ёстой.
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Үүнгүйгээр GHCR рүү түлхэх нь "denied: installation not allowed to Write
+  # the repository" гэж унана.
+  packages: write
+
+concurrency:
+  group: dgov-image
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build & push backend image
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # GHCR нь том үсэгтэй замыг татгалздаг; github.repository нь эзэмшигчийн
+      # үсгийн хэлбэрийг хадгалдаг.
+      - name: Compute image name
+        id: meta
+        run: echo "image=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/backend" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/Dockerfile
+          push: true
+          # `latest` нь .env-ийн анхдагч IMAGE_TAG; sha нь буцаж очих цэг.
+          # Платформын хувилбарыг build аргументаар өгөхгүй нь санаатай:
+          # Dockerfile түүнийг go.mod-оос уншина — тэр л үнэн хариулт.
+          tags: |
+            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image }}:${{ github.event.workflow_run.head_sha || github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend

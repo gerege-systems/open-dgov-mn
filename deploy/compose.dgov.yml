@@ -1,0 +1,42 @@
+# Цөмийн docker-compose.prod.yml дээр нэмэгдэх давхарга.
+#
+# Түвшин 2 болсноор энэ байрлуулалт өөрийн backend образтай боллоо. Цөмийн
+# compose нь backend болон migrate хоёрыг `${IMAGE_BACKEND}` -ээс авдаг тул
+# образыг солиход энд бичих зүйл байхгүй — .env-ийн нэг мөр л шийднэ.
+#
+# Энд бичих ёстой хоёр зүйл л үлдэнэ:
+#
+#   * энэ репогийн өөрийн миграцын түүх. Нэг санд хоёр goose түүх байгаа тул
+#     MIGRATIONS_TABLE нь сайн дурын биш: goose нь ажилласан хувилбар бүрд нэг
+#     мөр хадгалдаг ба цөмийн 00001, эндэх 00001 хоёр нэг мөр болох байсан;
+#
+#   * бүрхүүлийн тагийг backend-ийнхээс салгах. Хоёр образ одооноос өөр өөр
+#     амьдралтай — эндэх нь энэ репогийн commit бүрээс, бүрхүүл нь цөмийн CI-
+#     аас гардаг — тул тэднийг нэг IMAGE_TAG-аар барих нь худал хэлэх явдал.
+#
+# Хэрэглээ (deploy.sh өөрөө ингэж дууддаг):
+#   docker compose -f docker-compose.prod.yml -f deploy/compose.dgov.yml …
+
+services:
+  migrate-dgov:
+    image: ${IMAGE_BACKEND}:${IMAGE_TAG:-latest}
+    container_name: ${STACK:-gerege_nexus}_migrate_dgov
+    pull_policy: always
+    command: ["/app/migrate", "up"]
+    environment:
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/platform_db?sslmode=disable
+      MIGRATIONS_DIR: /app/db/dgov
+      MIGRATIONS_TABLE: goose_db_version_dgov
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  backend:
+    # Цөмийн файл дээрх depends_on-той нийлнэ, орлохгүй.
+    depends_on:
+      migrate-dgov:
+        condition: service_completed_successfully
+
+  frontend:
+    image: ${IMAGE_FRONTEND}:${FRONTEND_TAG:-latest}

@@ -1,0 +1,34 @@
+{
+  "id": "mn.dgov.zarlal",
+  "name": "Announcements",
+  "version": "1.0.0",
+  "platform": ">=1.7.0 <2.0.0",
+  "publisher": "dgov",
+  "authors": [{ "name": "Цахим Засаг" }],
+  "maintainers": [{ "name": "Цахим Засаг" }],
+  "repository": "https://github.com/gerege-systems/open-dgov-mn",
+  "homepage": "https://open.dgov.mn",
+  "license": "Apache-2.0",
+  "dependencies": [],
+  "permissions": [
+    {
+      "code": "zarlal.read",
+      "name": "Read announcements",
+      "description": "See this organisation's announcements"
+    },
+    {
+      "code": "zarlal.manage",
+      "name": "Post announcements",
+      "description": "Post and withdraw announcements"
+    }
+  ],
+  "menus": [
+    {
+      "id": "zarlal",
+      "label": "Announcements",
+      "path": "/module/dgov-zarlal",
+      "icon": "megaphone",
+      "order": 15
+    }
+  ]
+}
