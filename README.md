@@ -52,23 +52,35 @@ GHCR-ийн пакет хаалттай тул rollout бүр токеноор �
 (`SSO_CLIENT_ISSUER`). Өөрөө өөрийн дээрээ суусан аппуудад identity тарааж
 өгсөн хэвээр — `docs/SSO_FEDERATION.md`-ийн гурав дахь мөр.
 
-Провайдер дээр бүртгүүлэх зүйл:
+Провайдер дээр бүртгэгдсэн клиент:
 
 | | |
 | --- | --- |
-| `client_id` | `open-dgov-mn` |
+| `client_id` | `app_opendgovmn_28426259` |
+| `client_type` | `confidential` |
 | `redirect_uris` | `https://open.dgov.mn/api/v1/auth/sso/callback` |
 | `post_logout_redirect_uris` | `https://open.dgov.mn/` |
 | `grant_types` | `authorization_code` |
 | `scopes` | `openid profile email` |
 
+`client_id`-г провайдер өөрөө гаргадаг, гараар сонгодоггүй — тиймээс энэ мөр
+`open-dgov-mn` биш. Нууцыг бүртгэсэн тэр нэг удаад л уншина: сан нь digest
+хадгалдаг тул алдвал `rotate-secret`.
+
 `open.dgov.mn` нь провайдерийн `OAUTH_REDIRECT_HOSTS` дотор яг таг байх ёстой —
 тэр жагсаалт дэд домэйныг өвлүүлдэггүй.
 
-**`SSO_CLIENT_LOCAL_LOGIN` өнөөдөр `true`.** `sso.dgov.mn` хараахан босоогүй
-тул эндэх нууц үг, eID-ийн нэвтрэлт бол цорын ганц орох зам. Провайдер босч,
-түүгээр нэвтрэлт батлагдсаны дараа `false` болгоно — тэр үед энэ мөр
-провайдер унасан үеийн буцах зам болж үлдэнэ.
+**`SSO_CLIENT_LOCAL_LOGIN` нь `false`** (2026-08-17-ноос). Орох цорын ганц зам
+нь `sso.dgov.mn`; эндэх нууц үгийн endpoint 403 хариулна.
+
+Провайдер унавал буцах зам нь энэ нэг мөр:
+
+```bash
+ssh root@38.180.243.138
+cd /opt/open-dgov-mn
+sed -i 's|^SSO_CLIENT_LOCAL_LOGIN=.*|SSO_CLIENT_LOCAL_LOGIN=true|' .env
+docker compose -f docker-compose.prod.yml up -d backend
+```
 
 ## Эхний админ
 
