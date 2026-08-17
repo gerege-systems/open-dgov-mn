@@ -1,0 +1,75 @@
+name: Deploy
+
+# open.dgov.mn-ийг шинэчилнэ — образ угсарч дуусмагц, хүн хүлээхгүйгээр.
+#
+# image.yml дээр «роллаут автоматаар хийгдэхгүй, хүн харж байхад эхлэх ажил»
+# гэж бичсэн байсан. Тэр шийдвэрийн үнэ 2026-08-17-нд гарав: зөвшөөрлийн
+# дэлгэц унаж, засвар нь хагас цагт бэлэн болсон ч суулгац дээр гарахгүй
+# хэвтэв — «хүн харна» гэдэг практикт «хэн ч хийхгүй» болсон. Эзэмшигчийн
+# шийдвэрээр роллаут автомат боллоо.
+#
+# Гинж: CI → Image (GHCR) → энэ. Улаан CI бол образ ч байхгүй, роллаут ч
+# байхгүй. Угсарсан яг тэр commit-ын таг роллаут руу дамжина — `latest`
+# гэдэг нь «аль нь ч байж болно» гэсэн үг тул суулгац дээр ашиглахгүй.
+#
+# Шаардлагатай secret:
+#   DEPLOY_SSH_KEY   серверийн root-ийн authorized_keys дотор байгаа хувийн
+#                    түлхүүр. Байхгүй бол роллаут алгасагдана.
+#   GHCR_READ_TOKEN  хаалттай образуудыг татах токен (read:packages).
+#   DEPLOY_HOST      анхдагч 38.180.243.138
+#   DEPLOY_USER      анхдагч root
+
+on:
+  workflow_run:
+    # image.yml-ийн `name:`-тэй яг таарах ёстой.
+    workflows: ["Image"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: open-dgov-rollout
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Roll out to open.dgov.mn
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Check deployment secrets
+        id: guard
+        run: |
+          if [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ]; then
+            echo "::warning::DEPLOY_SSH_KEY тохируулаагүй — роллаут алгаслаа."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull and roll out
+        if: steps.guard.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          # Угсарсан образын таг: Image workflow-ийн үзсэн commit. Гараар
+          # ажиллуулбал энэ ажлын commit.
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST || '38.180.243.138' }}
+          username: ${{ secrets.DEPLOY_USER || 'root' }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: IMAGE_TAG,REGISTRY_USER,REGISTRY_TOKEN
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            cd /opt/open-dgov-mn
+            git fetch --prune origin main
+            # merge --ff-only, reset --hard биш: сервер дээр хэн нэгний үлдээсэн
+            # commit байвал түүнийг чимээгүй устгахаас чанга унасан нь дээр.
+            git merge --ff-only origin/main
+            ./deploy.sh

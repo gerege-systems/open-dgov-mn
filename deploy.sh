@@ -19,6 +19,16 @@ set -euo pipefail
 CORE_REF="${CORE_REF:-113a3e9984a51434f28ad0d2258b82b248254cb4}"
 CORE_RAW="https://raw.githubusercontent.com/gerege-systems/open-gerege-nexus/${CORE_REF}"
 
+# Бүрхүүлийн образын таг — CORE_REF-ийн адил ЭНД түгждэг, серверийн .env дээр
+# биш. Хоёр газар байхад сервер дээрх нь хождог: репо шинэ бүрхүүл заасан
+# атал суулгац хуучнаараа ажиллаж байсан өдөр (2026-08-17) яг ингэсэн.
+# CI роллаут хийхэд гар засвар үлдээхгүй байх нь энэ мөрийн бүх зорилго.
+export FRONTEND_TAG="${FRONTEND_TAG:-113a3e9984a51434f28ad0d2258b82b248254cb4}"
+
+# Backend образын таг. CI өөрийн угсарсан commit-оо дамжуулна; гараар
+# ажиллуулбал .env-ийнх (ихэвчлэн latest) хэвээр.
+if [ -n "${IMAGE_TAG:-}" ]; then export IMAGE_TAG; fi
+
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$APP_DIR"
 
