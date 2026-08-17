@@ -29,6 +29,11 @@ export FRONTEND_TAG="${FRONTEND_TAG:-66d5bdcbf68cf71b2ebb923671f79dab63ac4e55}"
 # ажиллуулбал .env-ийнх (ихэвчлэн latest) хэвээр.
 if [ -n "${IMAGE_TAG:-}" ]; then export IMAGE_TAG; fi
 
+# Цэсний «Баримт бичиг» хаашаа зааx. Мөн л репод: баримтын сайт өөрийн
+# домэйнтой болсон (docs.dgov.mn, docs-dgov-mn репо) бөгөөд хаяг солигдох нь
+# нэг мөрийн өөрчлөлт, серверт орж засах ажил биш.
+export BRAND_DOCS_URL="${BRAND_DOCS_URL:-https://docs.dgov.mn/}"
+
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$APP_DIR"
 
