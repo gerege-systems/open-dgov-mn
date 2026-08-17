@@ -11,7 +11,7 @@ set -euo pipefail
 # Цөмийн түгжигдсэн хувилбар. compose файл болон nginx-ийн snippet хоёулаа
 # эндээс ирнэ — салбарын толгойгоос биш: "өчигдөр ажиллаж байсан" гэдэг нь
 # тодорхой commit байх ёстой, өнөөдрийн main биш.
-CORE_REF="${CORE_REF:-d135c8871b0e5c0f99a25c0b316979d2e0c5f76c}"
+CORE_REF="${CORE_REF:-ca8c49e0a6fef22ea1763fdb42b3245d57438e5e}"
 CORE_RAW="https://raw.githubusercontent.com/gerege-systems/open-gerege-nexus/${CORE_REF}"
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
