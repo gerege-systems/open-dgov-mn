@@ -43,7 +43,15 @@ fi
 # лого тавьсны дараа л мэдэгддэг 403.
 mkdir -p brand && chmod 755 brand
 
-curl -fsSL -o docker-compose.prod.yml "${CORE_RAW}/docker-compose.prod.yml"
+# GitHub-ийн raw нь нэг IP-аас олон татахад 429 хариулдаг ба энэ хост дээр
+# хоёр стек, өдөрт хэд хэдэн роллаут байдаг. Дахин оролдохгүй бол тэр хариу
+# нь ажиллаж байгаа суулгацыг шинэчлэхээс татгалзсан deploy болно —
+# 2026-08-17-нд яг ингэсэн.
+fetch_core() {
+  curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o "$1" "${CORE_RAW}/$2"
+}
+
+fetch_core docker-compose.prod.yml docker-compose.prod.yml
 
 # Цөмийн compose, дээр нь энэ репогийн давхарга — гэхдээ зөвхөн .env нь энэ
 # репогийн образыг зааж байвал. Давхарга нь тэр образыг хүлээдэг: өөрийн
@@ -64,7 +72,7 @@ fi
 # nginx-ийн OIDC snippet. Vhost үүнийг include хийдэг — байхгүй бол `nginx -t`
 # унана, орхивол discovery-гийн хүсэлт бүрт бүрхүүлийн 404 хариулагдана.
 if [ -w /etc/nginx/snippets ]; then
-  curl -fsSL -o /etc/nginx/snippets/nexus-oauth.conf "${CORE_RAW}/deploy/nginx/snippets/nexus-oauth.conf"
+  fetch_core /etc/nginx/snippets/nexus-oauth.conf deploy/nginx/snippets/nexus-oauth.conf
 fi
 
 : "${REGISTRY_USER:?REGISTRY_USER шаардлагатай}"
