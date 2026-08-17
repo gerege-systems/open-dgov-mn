@@ -1,4 +1,16 @@
 {
+  "brand.name": {
+    "mn": "Засгийн газрын нээлттэй суурь платформ",
+    "en": "The Government's Open Platform"
+  },
+  "brand.short_name": {
+    "mn": "Цахим Засаг",
+    "en": "Digital Government"
+  },
+  "brand.description": {
+    "mn": "Төрийн үйлчилгээ баригддаг нээлттэй суурь",
+    "en": "The open foundation government services are built on"
+  },
   "website.view.hero_title_lead": {
     "mn": "Төрийн үйлчилгээ бүр",
     "en": "The open ground"
@@ -15,8 +27,10 @@
     "mn": "Байгууллага бүр нэвтрэлт, эрхийн загвар, аудит, олон хэлээ дахин бичдэг. Тэдгээр нь тухайн үйлчилгээний онцлог биш — ижил зүйлийг тус бүр өөр алдаатай бичсэн хувилбарууд. {brand} тэднийг нэг удаа, цөмдөө шийдсэн: дээр нь баригдсан үйлчилгээ бүр өвлөж авна.",
     "en": "Every organisation otherwise rewrites sign-in, permissions, audit and translation. None of that is specific to the service — they are the same thing written differently and broken differently each time. {brand} settles them once, in the core, and everything built on top inherits them."
   },
-
-  "website.stat.apps_count": { "mn": "1", "en": "1" },
+  "website.stat.apps_count": {
+    "mn": "1",
+    "en": "1"
+  },
   "website.stat.apps": {
     "mn": "нэвтрэлтийн цэг — sso.dgov.mn",
     "en": "way in: sso.dgov.mn"
@@ -29,13 +43,14 @@
     "mn": "бинари — нэг процесс, сүлжээний үсрэлтгүй",
     "en": "binary: one process, no network hops"
   },
-
   "website.action.see_features": {
     "mn": "Суурь нь юу вэ",
     "en": "What the foundation is"
   },
-
-  "website.arch.eyebrow": { "mn": "ЯАГААД ЭНЭ АРХИТЕКТУР", "en": "WHY THIS ARCHITECTURE" },
+  "website.arch.eyebrow": {
+    "mn": "ЯАГААД ЭНЭ АРХИТЕКТУР",
+    "en": "WHY THIS ARCHITECTURE"
+  },
   "website.arch.lede": {
     "mn": "Модуль бүр өөрийн домэйн, миграц, эрхтэй. Гэвч бүгд нэг процесс дотор ажилладаг тул модуль хоорондын дуудлага сүлжээгээр явахгүй — Go-ийн функцийн дуудлага л болно. Тархсан системийн зохион байгуулалтыг түүний хоцрогдол, дибаг хийх зовлонгүйгээр.",
     "en": "Every module owns its domain, its migrations and its permissions, and they all run in one process: a call between two of them is a function call, not a network hop. The organisation of a distributed system without its latency or its debugging."
@@ -48,8 +63,10 @@
     "mn": "Аль байгууллагад аль модуль идэвхтэйг өгөгдлийн сан шийднэ. Тусгаарлалт нь аппын кодын сахилга бат дээр биш, мөрийн түвшний хамгаалалт дээр тогтоно — модуль бичигч санахаа мартах боломжгүй.",
     "en": "The database decides which modules an organisation runs. Isolation rests on row-level security rather than on application discipline: a module author cannot forget to apply it."
   },
-
-  "website.depth.eyebrow": { "mn": "ЯАГААД СУУРЬ ГЭЖ БАЙХ ЁСТОЙ ВЭ", "en": "WHY A FOUNDATION AT ALL" },
+  "website.depth.eyebrow": {
+    "mn": "ЯАГААД СУУРЬ ГЭЖ БАЙХ ЁСТОЙ ВЭ",
+    "en": "WHY A FOUNDATION AT ALL"
+  },
   "website.depth.title": {
     "mn": "Үйлчилгээ бүрийн дахин бичдэг байсан зүйлс",
     "en": "The parts every service would otherwise rewrite"
@@ -62,18 +79,18 @@
     "mn": "Төрийн систем рүү шууд",
     "en": "Straight into state systems"
   },
-
-  "website.view.features_eyebrow": { "mn": "НЭВТРЭЛТ", "en": "IDENTITY" },
+  "website.view.features_eyebrow": {
+    "mn": "НЭВТРЭЛТ",
+    "en": "IDENTITY"
+  },
   "website.view.features_lede": {
     "mn": "{brand} хүнийг өөрөө таихгүй. Танилт нь sso.dgov.mn дээр — Засгийн газрын нэгдсэн нэвтрэлт дээр хийгдэнэ. Тиймээс хэн хаана нэвтэрсэн бэ гэдэгт нэг хариулт, түүнийг хаана цуцлах вэ гэдэгт ч нэг.",
     "en": "{brand} does not identify anyone itself. That happens at sso.dgov.mn, the unified government sign-in — so there is one answer to where a person is signed in, and one place to revoke it."
   },
-
   "website.tech.erp_body": {
     "mn": "Модульт үйлчилгээ, байгууллагын тусгаарлалт, эрхийн загвар",
     "en": "Modular services, tenant isolation, one permission model"
   },
-
   "website.message.footer_note": {
     "mn": "eID-д суурилсан · Нээлттэй эх, Apache 2.0 · Нэвтрэлт нь sso.dgov.mn",
     "en": "Built on eID · Open source, Apache 2.0 · Sign-in at sso.dgov.mn"

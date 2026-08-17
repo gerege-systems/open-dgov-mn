@@ -16,14 +16,14 @@ set -euo pipefail
 # Цөмийн түгжигдсэн хувилбар. compose файл болон nginx-ийн snippet хоёулаа
 # эндээс ирнэ — салбарын толгойгоос биш: "өчигдөр ажиллаж байсан" гэдэг нь
 # тодорхой commit байх ёстой, өнөөдрийн main биш.
-CORE_REF="${CORE_REF:-113a3e9984a51434f28ad0d2258b82b248254cb4}"
+CORE_REF="${CORE_REF:-abeb27b5ea8e720bae0b76634acb489e74db470e}"
 CORE_RAW="https://raw.githubusercontent.com/gerege-systems/open-gerege-nexus/${CORE_REF}"
 
 # Бүрхүүлийн образын таг — CORE_REF-ийн адил ЭНД түгждэг, серверийн .env дээр
 # биш. Хоёр газар байхад сервер дээрх нь хождог: репо шинэ бүрхүүл заасан
 # атал суулгац хуучнаараа ажиллаж байсан өдөр (2026-08-17) яг ингэсэн.
 # CI роллаут хийхэд гар засвар үлдээхгүй байх нь энэ мөрийн бүх зорилго.
-export FRONTEND_TAG="${FRONTEND_TAG:-113a3e9984a51434f28ad0d2258b82b248254cb4}"
+export FRONTEND_TAG="${FRONTEND_TAG:-abeb27b5ea8e720bae0b76634acb489e74db470e}"
 
 # Backend образын таг. CI өөрийн угсарсан commit-оо дамжуулна; гараар
 # ажиллуулбал .env-ийнх (ихэвчлэн latest) хэвээр.
