@@ -59,10 +59,19 @@ RUN core=$(go list -m -f '{{.Dir}}' github.com/gerege-systems/open-gerege-nexus/
 # үндэст байдаг тул модулийн кэшэд байхгүй — яг тэр тагийн архиваас авчирна.
 # Хувилбарыг go.mod-оос уншиж байгаа нь чухал: каталог ба бинар хоёр өөр
 # хувилбарынх байвал платформ өөрийн авчирсан аппуудыг таних эсэхээ мэдэхгүй.
+#
+# Татаж авахдаа файл руу, дараа нь задлана — шууд `| tar` руу цоргодоггүй.
+# Цорго нь HTTP-ийн бүтэлгүйтлийг tar-ын алдаа болгон орчуулдаг: 2026-08-17-нд
+# codeload 429 хариулахад барилт «gzip: invalid magic» гэж унасан бөгөөд тэр
+# мөр нь юу болсныг хэлдэггүй. `--retry-all-errors` нь тэр түр зуурын хариуг
+# дахин оролдоно, `tar -tzf` нь бүтэн архив ирснийг задлахаас өмнө нотолно.
 RUN v=$(go list -m -f '{{.Version}}' github.com/gerege-systems/open-gerege-nexus/backend) \
     && mkdir -p /core \
-    && curl -fsSL "https://codeload.github.com/gerege-systems/open-gerege-nexus/tar.gz/refs/tags/backend/${v}" \
-       | tar -xz -C /core --strip-components=1 "open-gerege-nexus-backend-${v}/catalog" \
+    && curl -fsSL --retry 5 --retry-delay 3 --retry-all-errors \
+       -o /tmp/core.tgz "https://codeload.github.com/gerege-systems/open-gerege-nexus/tar.gz/refs/tags/backend/${v}" \
+    && tar -tzf /tmp/core.tgz >/dev/null \
+    && tar -xzf /tmp/core.tgz -C /core --strip-components=1 "open-gerege-nexus-backend-${v}/catalog" \
+    && rm -f /tmp/core.tgz \
     && cp -r /core/catalog /out/catalog \
     && chmod -R u+w /out/catalog \
     && cp ./catalog/manifests/*.json /out/catalog/manifests/ \
