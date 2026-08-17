@@ -6,3 +6,5 @@
 brand/*
 !brand/gov_icon.png
 docker-compose.prod.yml
+docs/site/dist/
+docs/site/node_modules/
