@@ -10,3 +10,6 @@ brand/*
 docker-compose.prod.yml
 docs/site/dist/
 docs/site/node_modules/
+
+# Цөмөөс татсан файлуудын кэш — CORE_REF-ээр
+.core-cache/

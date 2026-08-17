@@ -48,12 +48,28 @@ fi
 # лого тавьсны дараа л мэдэгддэг 403.
 mkdir -p brand && chmod 755 brand
 
-# GitHub-ийн raw нь нэг IP-аас олон татахад 429 хариулдаг ба энэ хост дээр
-# хоёр стек, өдөрт хэд хэдэн роллаут байдаг. Дахин оролдохгүй бол тэр хариу
-# нь ажиллаж байгаа суулгацыг шинэчлэхээс татгалзсан deploy болно —
-# 2026-08-17-нд яг ингэсэн.
+# Цөмөөс ирдэг файлууд: татсан хувиа CORE_REF-ээр нь кэшэлнэ.
+#
+# GitHub-ийн raw нь нэг IP-аас олон татахад 429/503 хариулдаг ба энэ хост дээр
+# хоёр стек, өдөрт хэд хэдэн роллаут байна. Зөвхөн дахин оролдох нь
+# хангалтгүй байв: 2026-08-17-нд таван оролдлого таван удаа татгалзаж,
+# роллаут бүхэлдээ унасан.
+#
+# Кэш нь асуултыг өөрчилдөг — «GitHub яг одоо хариулж байна уу» биш, «энэ
+# commit-ын файл энд аль хэдийн байна уу». Пин өөрчлөгдөөгүй роллаут сүлжээ
+# рүү огт гарахгүй, тэгэхээр цөмийн шинэ хувилбар авах өдөр л GitHub
+# хэрэгтэй болно.
+CORE_CACHE="${CORE_CACHE:-$APP_DIR/.core-cache/$CORE_REF}"
+
 fetch_core() {
-  curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o "$1" "${CORE_RAW}/$2"
+  local dest="$1" path="$2"
+  local cached="$CORE_CACHE/$(basename "$path")"
+  if [ ! -s "$cached" ]; then
+    mkdir -p "$CORE_CACHE"
+    curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o "$cached.part" "${CORE_RAW}/$path"
+    mv "$cached.part" "$cached"
+  fi
+  cp "$cached" "$dest"
 }
 
 fetch_core docker-compose.prod.yml docker-compose.prod.yml
