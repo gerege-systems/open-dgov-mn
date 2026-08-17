@@ -80,9 +80,9 @@ Compose файлыг энд хуулж тавихгүй байгаа нь сан
 | Хөдөлгөх зүйл | Хаана | Одоо |
 | --- | --- | --- |
 | Энэ репогийн модулиуд | `main.go`/`modules/` → CI образ угсарна → `.env`-ийн `IMAGE_TAG` | `latest` |
-| Цөмийн код (backend) | `go.mod`-ын `open-gerege-nexus/backend` таг | `v1.8.0` |
+| Цөмийн код (backend) | `go.mod`-ын `open-gerege-nexus/backend` таг | `v1.9.0` |
 | Цөмийн compose, nginx snippet | `deploy.sh`-ийн `CORE_REF` | `c2e311e` |
-| Бүрхүүл (харагдах төрх) | `.env`-ийн `FRONTEND_TAG` | `latest` |
+| Бүрхүүл (харагдах төрх) | `.env`-ийн `FRONTEND_TAG` | `c2e311e` |
 
 Backend образыг `.github/workflows/image.yml` угсарна: CI ногоон болсны дараа
 `ghcr.io/gerege-systems/open-dgov-mn/backend` руу `latest` ба commit sha хоёр
