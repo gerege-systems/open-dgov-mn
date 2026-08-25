@@ -36,12 +36,24 @@ COPY . .
 # `"platform": ">=1.7.0"`-ыг шалгах утга бөгөөд үнэн хариулт нь энэ образ дотор
 # бодитоор компайл хийгдсэн платформын хувилбар. Build аргумент болговол
 # 0.0.0 гэж анхдагчлах бөгөөд суулгац өөрийнхөө авчирсан манифест бүрийг
-# татгалзана — өөрийн каталогоо уншиж чадахгүй тул асахгүй.
+# татгалзана — өөрийн каталогоо уншиж чадахгүй тул асахгүй.#
+# Тэр утга аль пакетад байгааг таамаглалгүй **асууна**. PlatformVersion нь
+# цөмийн v1.13.0-ийн дараа internal/platform-аас internal/kernel/config руу
+# нүүсэн бөгөөд байхгүй тэмдэгт рүү чиглэсэн `-X`-ийг линкер **чимээгүй үл
+# тоомсорлодог**: хуучин зам цэвэрхэн угсарч, образ өөрийгөө 1.1.0 гэж хэлээд,
+# дараа нь өөрийнхөө авчирсан manifest бүрийг татгалзаж огт асахгүй. Build-ийн
+# логт нэг ч мөр анхааруулга гарахгүй. Тиймээс хоёр нэрийг дарааллаар нь
+# шалгаж, аль нь ч байхгүй цөм дээр build-ийг эндээс чангаар унагана.
 RUN core=$(go list -m -f '{{.Version}}' github.com/gerege-systems/open-gerege-nexus/backend) \
     && version=${core#v} \
-    && echo "платформ ${version} нэрээр угсарч байна" \
+    && base=github.com/gerege-systems/open-gerege-nexus/backend/internal \
+    && for pkg in kernel/config platform; do \
+         if go list "$base/$pkg" >/dev/null 2>&1; then sym="$base/$pkg.PlatformVersion"; break; fi; \
+       done \
+    && { [ -n "${sym:-}" ] || { echo "no PlatformVersion package in ${core}"; exit 1; }; } \
+    && echo "платформ ${version} нэрээр угсарч байна (${sym##*/internal/})" \
     && CGO_ENABLED=0 GOOS=linux go build -trimpath \
-    -ldflags="-w -s -X github.com/gerege-systems/open-gerege-nexus/backend/internal/platform.PlatformVersion=${version}" \
+    -ldflags="-w -s -X ${sym}=${version}" \
     -o /bin/opendgov .
 
 # Цөмийн миграц ажиллуулагч, энэ бүтээгдэхүүний хамаарлаас. Тэр модуль доторх
